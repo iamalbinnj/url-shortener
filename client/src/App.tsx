@@ -2,7 +2,7 @@ import React, { useCallback, useMemo, useState } from "react";
 import { Copy, Check, ExternalLink, Link2, LoaderCircle } from "lucide-react";
 
 function App() {
-const [longUrl, setLongUrl] = useState("");
+  const [longUrl, setLongUrl] = useState("");
   const [shortUrl, setShortUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -33,7 +33,7 @@ const [longUrl, setLongUrl] = useState("");
 
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/api/v1/shorten/`, {
+      const res = await fetch(`${API_BASE}/shorten/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ long_url: longUrl }),
@@ -45,7 +45,6 @@ const [longUrl, setLongUrl] = useState("");
       }
 
       const data = await res.json();
-      // Expecting { short_url: "http://127.0.0.1:8000/Ab12Cd", ... }
       if (data?.short_url) {
         setShortUrl(data.short_url);
       } else if (data?.short_code) {
@@ -53,10 +52,12 @@ const [longUrl, setLongUrl] = useState("");
       } else {
         throw new Error("Unexpected response format from server");
       }
-    } catch (err: any) {
-      setError(err?.message || "Something went wrong");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Something went wrong";
+      setError(message);
       setShortUrl(null);
-    } finally {
+    }
+    finally {
       setLoading(false);
     }
   };
@@ -91,7 +92,7 @@ const [longUrl, setLongUrl] = useState("");
               <input
                 id="longUrl"
                 type="url"
-                placeholder="https://example.com/some/very/long/path?with=params"
+                placeholder="https://example.com/path?with=params"
                 value={longUrl}
                 onChange={(e) => setLongUrl(e.target.value)}
                 className="flex-1 rounded-xl bg-slate-900/70 px-4 py-3 outline-none ring-1 ring-white/10 focus:ring-2 focus:ring-indigo-400 placeholder:text-slate-500"
@@ -144,10 +145,6 @@ const [longUrl, setLongUrl] = useState("");
             </div>
           )}
         </div>
-
-        <footer className="mt-6 text-center text-[13px] text-slate-500">
-          Powered by Django + SQLite · Frontend in React + Tailwind
-        </footer>
       </div>
     </div>
   );
